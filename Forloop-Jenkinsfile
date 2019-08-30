@@ -1,0 +1,22 @@
+/* Script step in Declarative Pipeline */
+//
+pipeline {
+    agent any
+    stages {
+        stage ('Sample Stage') {
+            steps {
+                sh 'echo "This is just a sample stage"'
+            }
+        }
+        stage ('Echo Loop') {
+            steps {
+                script{
+                for (int i=0;i<=3;i++) {
+                    sh 'echo "Hai, I am from Script step"'
+                }
+                }
+            }
+        }
+    }
+}
+
