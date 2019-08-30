@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+    stages {
+        stage ('Create Tomcat and Deploy Sample.war') {
+            agent {
+                docker { 
+                    image 'sriharsha219/my-tomcat8:latest' 
+                    args '-p 8060:8080'
+                }
+            }
+            steps {
+                sh 'echo "Tomcat container created"'
+                sh 'cd /usr/local/tomcat/webapps'
+                sh 'rm -rf sample*'
+                sh 'rm -rf Hello*'
+                sh 'wget https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war'
+                sh 'echo "sample.war file downloaded and deployed in Tomcat web container"'
+                input("Tomcat Server Check")
+            }
+        }
+        stage ('Create Nexus Container') {
+            agent {
+                docker {
+                image 'sriharsha219/my-nexus:latest'
+                args '-p 8061:8081'
+                }
+            }
+            steps {
+                sh 'echo "Nexus container created"'
+                input("Nexus Server Check")
+            }
+        }
+        /*
+        stage ('Destroying Containers') {
+            steps {
+                sh 'docker stop Tomcat Nexus'
+                sh 'docker rm Tomcat Nexus'
+                sh 'docker ps -a'
+            }
+            
+        }*/
+    }
+    post {
+        always {
+            sh 'docker ps -a'
+            echo 'One way or another, I have finished'
+            deleteDir() /* clean up our workspace */
+        }
+    }
+}
